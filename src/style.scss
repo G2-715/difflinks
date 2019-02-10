@@ -8,7 +8,7 @@ html, body {
 body {
     background-color: #141727;
     color: #b4b4b4;
-    font-family: 'Quicksand', sans-serif;
+    font: normal 16px 'Quicksand', sans-serif;
 
     .wrapper {
         display: flex;
@@ -32,7 +32,7 @@ body {
 
                 &_tagline {
                     color: #ffffff;
-                    font-size: 24px;
+                    font-size: 26px;
                 }
             }
         }
@@ -53,12 +53,19 @@ body {
 
                 &_changing-data {
                     padding: 14px 40px;
+                    width: 680px;
+                    min-height: 72px;
+                    text-align: center;
                     border-radius: 8px;
                     background-color: inherit;
                     color: #ffffff;
                     border: 2px solid #ffffff;
                     margin-bottom: 24px;
                     transition: .2s;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    box-sizing: border-box;
 
                     &:hover {
                         background-color: rgba(255,255,255, 0.2);
@@ -94,27 +101,88 @@ body {
                 }
 
                 &_change-data-btn {
-                    button {
+                    .btn {
                         padding: 14px 40px;
-                        border-radius: 8px;
                         font-size: 24px;
-                        background-color: inherit;
-                        color: #ffffff;
-                        border: 2px solid #ffffff;
-                        outline: none;
-                        transition: .2s;
-                        cursor: pointer;
-
-                        &:hover {
-                            background-color: rgba(255,255,255, 0.2);
-                        }
-
-                        &:active {
-                            background-color: rgba(255,255,255, 0.4);
-                        }
                     }
                 }
             }
         }
     }
+
+    .btn {
+        padding: 8px 14px;
+        border-radius: 8px;
+        font-size: 16px;
+        background-color: transparent;
+        color: #ffffff;
+        border: 2px solid #ffffff;
+        outline: none;
+        transition: .2s;
+        cursor: pointer;
+
+        &:hover {
+            background-color: rgba(255,255,255, 0.2);
+        }
+
+        &:active {
+            background-color: rgba(255,255,255, 0.4);
+        }
+    }
+
+    .input {
+        font: normal 16px 'Quicksand', sans-serif;
+    }
+
+    .loading {
+        position: relative;
+        color: transparent !important;
+
+        &:before {
+            content: '';
+            display: inline-block;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            margin-top: -12px;
+            margin-left: -12px;
+            width: 24px;
+            height: 24px;
+            background: transparent;
+            border-width: 2px;
+            border-style: solid;
+            border-top-color: transparent;
+            border-bottom-color: transparent;
+            border-left-color: #ffffff;
+            border-right-color: #ffffff;
+            border-radius: 50%;
+            box-sizing: border-box;
+
+            -webkit-animation: loading 1s ease-in-out infinite;
+            -moz-animation:    loading 1s ease-in-out infinite;
+            -o-animation:      loading 1s ease-in-out infinite;
+            animation:         loading 1s ease-in-out infinite;
+        }
+    }
+}
+
+@-webkit-keyframes loading {
+    0%   { transform: rotate(0deg) scale(1); }
+    50%  { transform: rotate(180deg) scale(1.1); }
+    100% { transform: rotate(360deg) scale(1); }
+}
+@-moz-keyframes loading {
+    0%   { transform: rotate(0deg) scale(1); }
+    50%  { transform: rotate(180deg) scale(1.1); }
+    100% { transform: rotate(360deg) scale(1); }
+}
+@-o-keyframes loading {
+    0%   { transform: rotate(0deg) scale(1); }
+    50%  { transform: rotate(180deg) scale(1.1); }
+    100% { transform: rotate(360deg) scale(1); }
+}
+@keyframes loading {
+    0%   { transform: rotate(0deg) scale(1); }
+    50%  { transform: rotate(180deg) scale(1.1); }
+    100% { transform: rotate(360deg) scale(1); }
 }
