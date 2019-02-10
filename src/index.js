@@ -14,10 +14,28 @@ import "./style.scss";
     loading = false;
 
     function setData (data) {
+        // Remove all spaces
+        data = data.replace(/\s/g,'');
+        let linkWithProtocol = getWithProtocol(data);
+        let secretLink = getSecretLink(linkWithProtocol);
         changingData.classList.contains('loading') ? changingData.classList.remove('loading') : null
-        changingData.href = data;
-        changingData.title = data;
-        animateInput(changingData, 'innerHTML', data, 0);
+        changingData.href = linkWithProtocol;
+        changingData.title = secretLink;
+        animateInput(changingData, 'innerHTML', secretLink, 0);
+    }
+
+    function getWithProtocol (link) {
+        let pattern = /^((http|https|ftp):\/\/)/;
+
+        if(!pattern.test(link)) {
+            return ("http://" + trimByChar(link, '/'));
+        }
+
+        return link
+    }
+
+    function getSecretLink (link) {
+        return link
     }
 
     function changeData (e) {
@@ -72,6 +90,12 @@ import "./style.scss";
 
     function setBtnLoading (element, loading) {
         loading ? element.classList.add('loading') : element.classList.remove('loading')
+    }
+
+    function trimByChar(string, character) {
+        const first = [...string].findIndex(char => char !== character);
+        const last = [...string].reverse().findIndex(char => char !== character);
+        return string.substring(first, string.length - last);
     }
 
     // Window listeners
