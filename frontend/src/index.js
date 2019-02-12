@@ -27,7 +27,7 @@ import "./style.scss";
     loading = false;
     timeoutId = null;
     api = "http://localhost:5000";
-    stubs = true;
+    stubs = false;
 
     function setData(data) {
         // Remove all spaces
