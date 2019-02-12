@@ -4,13 +4,9 @@ const bodyParser = require("body-parser");
 
 const app = express();
 const port = 5000;
-const address = 'localhost';
+const address = 'http://213.226.124.201';
 
 app.use(bodyParser());
-// app.use(cors({
-//   origin: "http://172.16.43.201:5000/",
-//   methods: ['GET', 'PUT', 'POST', 'DELETE']
-// }))
 
 let link = {
   link: "awesome.ru"
@@ -24,7 +20,7 @@ app.get('/link', (req, res) => {
 });
 
 app.post('/setlink', (req, res) => {
-  console.log(req.body);
+  console.log(req.body.link);
   link.link = req.body.link;
 
   res.send("good");
