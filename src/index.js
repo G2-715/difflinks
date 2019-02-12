@@ -1,19 +1,31 @@
 import "./style.scss";
 
-const api = "http://localhost:5000";
-
 (function () {
     let changingData,
         dataInput,
         changeDataBtn,
-        inputSpeed,
-        loading;
+        helpIcon,
+        helpPopover,
+        defaultInputSpeed,
+        inputAnimationDuration,
+        minDataLengthForDefaultSpeed,
+        loading,
+        timeoutId,
+        api,
+        stubs;
 
     changingData = document.querySelector('.data-container_changing-data a');
     dataInput = document.querySelector('.data-container_data-input input');
     changeDataBtn = document.querySelector('.data-container_change-data-btn button');
-    inputSpeed = 100;
+    helpIcon = document.querySelector('.help_question-icon');
+    helpPopover = document.querySelector('.help_popover');
+    defaultInputSpeed = 60;
+    inputAnimationDuration = 2000;
+    minDataLengthForDefaultSpeed = 30;
     loading = false;
+    timeoutId = null;
+    api = "http://localhost:5000";
+    stubs = true;
 
     function setData(data) {
         // Remove all spaces
@@ -23,7 +35,7 @@ const api = "http://localhost:5000";
         changingData.classList.contains('loading') ? changingData.classList.remove('loading') : null
         changingData.href = linkWithProtocol;
         changingData.title = secretLink;
-        animateInput(changingData, 'innerHTML', secretLink, 0);
+        animateInput(changingData, 'innerHTML', secretLink, 0, getInputSpeed(secretLink));
     }
 
     function getWithProtocol(link) {
@@ -59,16 +71,24 @@ const api = "http://localhost:5000";
         }
     }
 
-    function animateInput(element, attribute, text, index, callback) {
+    function animateInput(element, attribute, text, index, inputSpeed, callback) {
         if (index < text.length) {
-            setTimeout(() => {
+            timeoutId ? timeoutId = clearTimeout(timeoutId) : null;
+            timeoutId = setTimeout(() => {
                 element[attribute] = text.substring(0, index + 1);
-                animateInput(element, attribute, text, index + 1, callback);
+                animateInput(element, attribute, text, index + 1, inputSpeed, callback);
             }, inputSpeed);
         }
         else {
-            callback ? callback() : null
+            timeoutId ? timeoutId = clearTimeout(timeoutId) : null;
+            callback ? callback() : null;
         }
+    }
+
+    function getInputSpeed(text) {
+        return (text.length >= minDataLengthForDefaultSpeed ?
+            Math.round(inputAnimationDuration / text.length)
+            : defaultInputSpeed);
     }
 
     function handleDataInputEnter(e) {
@@ -78,25 +98,55 @@ const api = "http://localhost:5000";
     }
 
     function getData() {
-        return fetch(`${api}/link`)
-            .then(res => res.json())
-            .then(data => data.link);
+        return stubs ?
+            new Promise((res, rej) => {
+                res(localStorage.getItem('link') || '...');
+            })
+            : fetch(`${api}/link`)
+                .then(res => res.json())
+                .then(data => data.link);
     }
 
     function sendData(data) {
-        return fetch(`${api}/setlink`, {
-            method: "POST",
-            body: JSON.stringify({
-                link: data
-            }),
-            headers: {
-                "Content-Type": "application/json"
-            }
-        })
+        return stubs ?
+            new Promise((res, rej) => {
+                localStorage.setItem('link', data);
+                res();
+            })
+            : fetch(`${api}/setlink`, {
+                method: "POST",
+                body: JSON.stringify({
+                    link: data
+                }),
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            })
     }
 
     function setBtnLoading(element, loading) {
         loading ? element.classList.add('loading') : element.classList.remove('loading')
+    }
+
+    function hidePopover (element) {
+        element.classList.add('hidden')
+    }
+
+    function showPopover (element) {
+        element.classList.remove('hidden')
+    }
+
+    function togglePopover (element) {
+        if (element.classList.contains('hidden')) {
+            showPopover(element)
+        }
+        else {
+            hidePopover(element)
+        }
+    }
+
+    function toggleHelpPopover () {
+        togglePopover(helpPopover)
     }
 
     function trimByChar(string, character) {
@@ -105,12 +155,14 @@ const api = "http://localhost:5000";
         return string.substring(first, string.length - last);
     }
 
-    // Window listeners
-    window.addEventListener('load', function () {
-        changeDataBtn.addEventListener('click', changeData, false)
-        dataInput.addEventListener('keyup', handleDataInputEnter, false)
-    }, false);
+    function handleWindowClick (e) {
+        // Check if helpPopover or helpIcon triggers click
+        if (!(helpPopover.contains(e.target) || e.target === helpIcon)) {
+            hidePopover(helpPopover)
+        }
+    }
 
+    // Window listeners
     window.addEventListener('DOMContentLoaded', function () {
         getData()
             .then(resp => {
@@ -118,9 +170,17 @@ const api = "http://localhost:5000";
             })
     }, false);
 
-    window.addEventListener('unload', function () {
-        changeDataBtn.removeEventListener('click', changeData, false)
-        dataInput.removeEventListener('keyup', handleDataInputEnter, false)
+    window.addEventListener('load', function () {
+        changeDataBtn.addEventListener('click', changeData, false);
+        dataInput.addEventListener('keyup', handleDataInputEnter, false);
+        helpIcon.addEventListener('click', toggleHelpPopover, false);
+        window.addEventListener('click', handleWindowClick, false);
     }, false);
 
+    window.addEventListener('unload', function () {
+        changeDataBtn.removeEventListener('click', changeData, false);
+        dataInput.removeEventListener('keyup', handleDataInputEnter, false);
+        helpIcon.removeEventListener('click', toggleHelpPopover, false);
+        window.removeEventListener('click', handleWindowClick, false);
+    }, false);
 })();
