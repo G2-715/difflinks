@@ -6,6 +6,7 @@ import "./style.scss";
         changeDataBtn,
         helpIcon,
         helpPopover,
+        reloadDataBtn,
         defaultInputSpeed,
         inputAnimationDuration,
         minDataLengthForDefaultSpeed,
@@ -19,6 +20,7 @@ import "./style.scss";
     changeDataBtn = document.querySelector('.data-container_change-data-btn button');
     helpIcon = document.querySelector('.help_question-icon');
     helpPopover = document.querySelector('.help_popover');
+    reloadDataBtn = document.querySelector('.data-container_reload-data');
     defaultInputSpeed = 60;
     inputAnimationDuration = 2000;
     minDataLengthForDefaultSpeed = 30;
@@ -71,6 +73,13 @@ import "./style.scss";
         }
     }
 
+    function updateData () {
+        return getData()
+            .then(resp => {
+                setData(resp)
+            })
+    }
+
     function animateInput(element, attribute, text, index, inputSpeed, callback) {
         if (index < text.length) {
             timeoutId ? timeoutId = clearTimeout(timeoutId) : null;
@@ -100,7 +109,9 @@ import "./style.scss";
     function getData() {
         return stubs ?
             new Promise((res, rej) => {
-                res(localStorage.getItem('link') || '...');
+                setTimeout(() => {
+                    res(localStorage.getItem('link') || '...');
+                }, 1000);
             })
             : fetch(`${api}/link`)
                 .then(res => res.json())
@@ -110,8 +121,10 @@ import "./style.scss";
     function sendData(data) {
         return stubs ?
             new Promise((res, rej) => {
-                localStorage.setItem('link', data);
-                res();
+                setTimeout(() => {
+                    localStorage.setItem('link', data);
+                    res();
+                }, 1000);
             })
             : fetch(`${api}/setlink`, {
                 method: "POST",
@@ -126,6 +139,27 @@ import "./style.scss";
 
     function setBtnLoading(element, loading) {
         loading ? element.classList.add('loading') : element.classList.remove('loading')
+    }
+
+    function setReloadDataBtnLoading(loading) {
+        loading ? reloadDataBtn.classList.add('loading') : reloadDataBtn.classList.remove('loading')
+    }
+
+    function hideReloadDataBtn () {
+        reloadDataBtn.classList.add('hidden')
+    }
+
+    function showReloadDataBtn () {
+        reloadDataBtn.classList.remove('hidden')
+    }
+
+    function toggleReloadDataBtn () {
+        if (reloadDataBtn.classList.contains('hidden')) {
+            showReloadDataBtn()
+        }
+        else {
+            hideReloadDataBtn()
+        }
     }
 
     function hidePopover (element) {
@@ -162,19 +196,26 @@ import "./style.scss";
         }
     }
 
-    // Window listeners
-    window.addEventListener('DOMContentLoaded', function () {
-        getData()
-            .then(resp => {
-                setData(resp)
+    function handleReloadDataBtnClick (e) {
+        loading = true;
+        setReloadDataBtnLoading(loading);
+        updateData()
+            .then(hideReloadDataBtn)
+            .then(() => {
+                loading = false;
+                setReloadDataBtnLoading(loading);
             })
-    }, false);
+    }
+
+    // Window listeners
+    window.addEventListener('DOMContentLoaded', updateData, false);
 
     window.addEventListener('load', function () {
         changeDataBtn.addEventListener('click', changeData, false);
         dataInput.addEventListener('keyup', handleDataInputEnter, false);
         helpIcon.addEventListener('click', toggleHelpPopover, false);
         window.addEventListener('click', handleWindowClick, false);
+        reloadDataBtn.addEventListener('click', handleReloadDataBtnClick, false);
     }, false);
 
     window.addEventListener('unload', function () {
@@ -182,5 +223,6 @@ import "./style.scss";
         dataInput.removeEventListener('keyup', handleDataInputEnter, false);
         helpIcon.removeEventListener('click', toggleHelpPopover, false);
         window.removeEventListener('click', handleWindowClick, false);
+        reloadDataBtn.removeEventListener('click', handleReloadDataBtnClick, false);
     }, false);
 })();
