@@ -1,6 +1,8 @@
 import "./style.scss";
 
-(function() {
+const api = "http://localhost:5000";
+
+(function () {
     let changingData,
         dataInput,
         changeDataBtn,
@@ -13,9 +15,9 @@ import "./style.scss";
     inputSpeed = 100;
     loading = false;
 
-    function setData (data) {
+    function setData(data) {
         // Remove all spaces
-        data = data.replace(/\s/g,'');
+        data = data.replace(/\s/g, '');
         let linkWithProtocol = getWithProtocol(data);
         let secretLink = getSecretLink(linkWithProtocol);
         changingData.classList.contains('loading') ? changingData.classList.remove('loading') : null
@@ -24,21 +26,21 @@ import "./style.scss";
         animateInput(changingData, 'innerHTML', secretLink, 0);
     }
 
-    function getWithProtocol (link) {
+    function getWithProtocol(link) {
         let pattern = /^((http|https|ftp):\/\/)/;
 
-        if(!pattern.test(link)) {
+        if (!pattern.test(link)) {
             return ("http://" + trimByChar(link, '/'));
         }
 
         return link
     }
 
-    function getSecretLink (link) {
+    function getSecretLink(link) {
         return link
     }
 
-    function changeData (e) {
+    function changeData(e) {
         let currentValue = dataInput.value;
 
         if (currentValue) {
@@ -57,7 +59,7 @@ import "./style.scss";
         }
     }
 
-    function animateInput (element, attribute, text, index, callback) {
+    function animateInput(element, attribute, text, index, callback) {
         if (index < text.length) {
             setTimeout(() => {
                 element[attribute] = text.substring(0, index + 1);
@@ -69,26 +71,31 @@ import "./style.scss";
         }
     }
 
-    function handleDataInputEnter (e) {
+    function handleDataInputEnter(e) {
         if (e.keyCode === 13) {
             changeData(e)
         }
     }
 
-    function getData () {
-        return new Promise((res, rej) => {
-            setTimeout(() => res(localStorage.getItem('data')), 1000)
+    function getData() {
+        return fetch(`${api}/link`)
+            .then(res => res.json())
+            .then(data => data.link);
+    }
+
+    function sendData(data) {
+        return fetch(`${api}/setlink`, {
+            method: "POST",
+            body: JSON.stringify({
+                link: data
+            }),
+            headers: {
+                "Content-Type": "application/json"
+            }
         })
     }
 
-    function sendData (data) {
-        return new Promise((res, rej) => {
-            localStorage.setItem('data', data)
-            setTimeout(res, 1000)
-        })
-    }
-
-    function setBtnLoading (element, loading) {
+    function setBtnLoading(element, loading) {
         loading ? element.classList.add('loading') : element.classList.remove('loading')
     }
 
