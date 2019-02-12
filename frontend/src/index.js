@@ -26,7 +26,7 @@ import "./style.scss";
     minDataLengthForDefaultSpeed = 30;
     loading = false;
     timeoutId = null;
-    api = "localhost";
+    api = "http://213.226.124.201:5000/";
     stubs = false;
 
     function setData(data) {
